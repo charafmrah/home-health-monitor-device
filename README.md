@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/charafmrah/home-health-monitor">
-    <img src="public/logo.svg" alt="Logo" width="80" height="80">
+    <img src="https://github.com/charafmrah/home-health-monitor/public/logo.svg" alt="Logo" width="80" height="80">
   </a>
 
  <h3 align="center">Home Health Monitor IoT Device Code</h3>
