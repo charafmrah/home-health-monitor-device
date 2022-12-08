@@ -20,15 +20,8 @@
 
 ## About The Project
 
-![Home Health Monitor Screen Shot][product-screenshot]
 
 This is a side project I worked on to build a home health monitor IoT device that reads temperature & humidity sensor data. The device publishes sensory data to AWS IoT core using using the MQTT lightweight protocol.
-
-This is the device:
-![](img1.jpg)
-
-And this is Theo helping:
-![](img2.jpg)
 
 ### Built With
 
@@ -39,8 +32,5 @@ And this is Theo helping:
 
 [license-shield]: https://img.shields.io/github/license/charafmrah/home-health-monitor.svg?style=for-the-badge
 [license-url]: https://github.com/charafmrah/home-health-monitor/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/charafmrah
-[product-screenshot]: screenshot.png
 [cpp]: https://img.shields.io/badge/c%2B%2B-044F88?style=for-the-badge&logo=c%2B%2B&logoColor=white
 [cpp-url]: https://cplusplus.com/
