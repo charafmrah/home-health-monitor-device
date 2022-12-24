@@ -5,6 +5,7 @@
 #include <time.h>
 #include "Secrets.h"
 #include "DHT.h"
+#include <cmath>
 
 // Digital pin connected to the DHT sensor
 #define DHTPIN 4
@@ -13,13 +14,11 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-float h ;
+float h;
 float t;
-unsigned long lastMillis = 0;
-unsigned long previousMillis = 0;
-const long interval = 5000;
+const long interval = 10000;
 
-#define AWS_IOT_PUBLISH_TOPIC   "esp8266/pub"
+#define AWS_IOT_PUBLISH_TOPIC "esp8266/pub"
 #define AWS_IOT_SUBSCRIBE_TOPIC "esp8266/sub"
 
 WiFiClientSecure net;
@@ -36,17 +35,19 @@ time_t nowish = 1510592825;
 // LED light
 int led = 5;
 
-void NTPConnect(void) {
+void NTPConnect(void)
+{
   Serial.print("Setting time using SNTP");
   configTime(TIME_ZONE * 3600, 0 * 3600, "pool.ntp.org", "time.nist.gov");
   now = time(nullptr);
-  
-  while (now < nowish) {
+
+  while (now < nowish)
+  {
     delay(500);
     Serial.print(".");
     now = time(nullptr);
   }
-  
+
   Serial.println("done!");
   struct tm timeinfo;
   gmtime_r(&now, &timeinfo);
@@ -54,28 +55,30 @@ void NTPConnect(void) {
   Serial.print(asctime(&timeinfo));
 }
 
-
-void messageReceived(char *topic, byte *payload, unsigned int length) {
+void messageReceived(char *topic, byte *payload, unsigned int length)
+{
   Serial.print("Received [");
   Serial.print(topic);
   Serial.print("]: ");
 
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     Serial.print((char)payload[i]);
   }
-  
+
   Serial.println();
 }
 
-
-void connectAWS() {
+void connectAWS()
+{
   delay(3000);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  Serial.println(String("Attempting to connect to SSID: ") + String(WIFI_SSID));
+  Serial.println(String("Connecting to WiFi SSID: ") + String(WIFI_SSID));
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     Serial.print(".");
     delay(1000);
   }
@@ -88,27 +91,28 @@ void connectAWS() {
   client.setServer(MQTT_HOST, 8883);
   client.setCallback(messageReceived);
 
-
   Serial.println("Connecting to AWS IOT");
 
-  while (!client.connect(THINGNAME)) {
+  while (!client.connect(THINGNAME))
+  {
     Serial.print(".");
     delay(1000);
   }
 
-  if (!client.connected()) {
+  if (!client.connected())
+  {
     Serial.println("AWS IoT Timeout!");
     return;
   }
-  
+
   // Subscribe to a topic
   client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
 
   Serial.println("AWS IoT Connected!");
 }
 
-
-void publishMessage() {
+void publishMessage()
+{
   StaticJsonDocument<200> doc;
   doc["time"] = millis();
   doc["humidity"] = h;
@@ -119,24 +123,26 @@ void publishMessage() {
   client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
 }
 
-
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  pinMode(led, OUTPUT); 
+  pinMode(led, OUTPUT);
   connectAWS();
   dht.begin();
 }
 
+void loop()
+{
+  digitalWrite(led, LOW);
 
-void loop() {
-  digitalWrite(led, LOW); 
-   
   h = dht.readHumidity();
-  t = dht.readTemperature();
+  t = floor(dht.readTemperature());
 
-  if (isnan(h) || isnan(t) ) { // Check if any reads failed and exit early (to try again).
-  Serial.println(F("Failed to read from DHT sensor!"));
-  return;
+  if (isnan(h) || isnan(t))
+  { // Check if any reads failed and exit early (to try again).
+    Serial.println(F("Failed to read from DHT sensor!"));
+    delay(1000);
+    return;
   }
 
   Serial.print(F("Humidity: "));
@@ -144,18 +150,17 @@ void loop() {
   Serial.print(F("% Temperature: "));
   Serial.print(t);
   Serial.println(F(" deg C "));
-  delay(2000);
-
+  
   now = time(nullptr);
 
-  if (!client.connected()) {
+  if (!client.connected())
+  {
     connectAWS();
   }
-  else {
+  else
+  {
     client.loop();
-    if (millis() - lastMillis > 5000) {
-      lastMillis = millis();
-      publishMessage();
-    }
+    publishMessage();
   }
+  delay(10000); 
 }
